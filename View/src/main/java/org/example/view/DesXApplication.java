@@ -2,36 +2,29 @@ package org.example.view;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.stage.StageStyle;
+
+import java.io.IOException;
 
 public class DesXApplication extends Application {
 
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/DesXApplication.fxml"));
-            Scene scene = new Scene(root);
-
-            Image icon = new Image("icon.png");
-
-            primaryStage.getIcons().add(icon);
-            primaryStage.setTitle("DESX GUI");
-            primaryStage.setWidth(500);
-            primaryStage.setHeight(700);
-            primaryStage.setResizable(false);
-
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void start(Stage primaryStage) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
+        scene.setFill(Color.TRANSPARENT);
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
+        Image icon = new Image("icons/app_icon.png");
+        primaryStage.getIcons().add(icon);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }
