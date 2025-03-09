@@ -24,8 +24,8 @@
     -fx-font-family: "SF Pro Display", Serif;
     -fx-text-fill: #ffc400;
     -fx-prompt-text-fill: rgba(255, 196, 0, 0.5);
-    -fx-border-color: #ffc400;
-    -fx-border-width: 0.7px;
+    /*-fx-border-color: #ffc400;*/
+    /*-fx-border-width: 0.7px;*/
     -fx-border-radius: 12px;
 }
 
@@ -45,9 +45,14 @@
 }
 
 .button-inside {
-    -fx-background-color: #ffc400;
+    /*-fx-background-color: #ffc400;*/
+    -fx-background-color: #182636;
     -fx-background-radius: 12px;
-    -fx-text-fill: #182636;
+    /*-fx-text-fill: #182636;*/
+    -fx-text-fill: #ffc400;
+    -fx-border-color: #ffc400;
+    -fx-border-width: 0.7px;
+    -fx-border-radius: 12px;
 }
 
 .text-area {
@@ -56,8 +61,8 @@
     -fx-font-family: "SF Pro Display", Serif;
     -fx-text-fill: #ffc400;
     -fx-prompt-text-fill: rgba(255, 196, 0, 0.5);
-    -fx-border-color: #ffc400;
-    -fx-border-width: 0.7px;
+    /*-fx-border-color: #ffc400;*/
+    /*-fx-border-width: 0.7px;*/
     -fx-border-radius: 12px;
 }
 
@@ -66,7 +71,7 @@
 }
 
 .text-area:focused {
-    -fx-border-color: #ffcc00;
+    /*-fx-border-color: #ffcc00;*/
 }
 
 .text-area .scroll-pane {
