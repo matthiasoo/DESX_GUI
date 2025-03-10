@@ -2,7 +2,6 @@ package org.example.view;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -54,8 +53,8 @@ public class DesXController {
     @FXML
     private Button keySaver;
 
-    private double x = 0;
-    private double y = 0;
+    private double xxCord = 0;
+    private double yyCord = 0;
 
     @FXML
     void close(ActionEvent event) {
@@ -71,15 +70,15 @@ public class DesXController {
 
     @FXML
     void pressed(MouseEvent event) {
-        x = event.getSceneX();
-        y = event.getSceneY();
+        xxCord = event.getSceneX();
+        yyCord = event.getSceneY();
     }
 
     @FXML
     void dragged(MouseEvent event) {
         Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
-        stage.setX(event.getScreenX() - x);
-        stage.setY(event.getScreenY() - y);
+        stage.setX(event.getScreenX() - xxCord);
+        stage.setY(event.getScreenY() - yyCord);
     }
 
     @FXML
