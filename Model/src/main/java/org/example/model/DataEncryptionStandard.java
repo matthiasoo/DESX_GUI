@@ -98,18 +98,7 @@ public class DataEncryptionStandard {
     public DataEncryptionStandard(String key, String msg, boolean hex) {
         BigInteger k = new BigInteger(key, 16);
         this.keyBytes = k.toByteArray();
-
-        if (hex) {
-            BigInteger bg = new BigInteger(msg, 16);
-            byte[] ba = bg.toByteArray();
-
-            if (ba.length % 8 == 1 && ba[0] == 0) {
-                ba = Arrays.copyOfRange(ba, 1, ba.length);
-            }
-            createBlocks(ba);
-        } else {
-            createBlocks(msg.getBytes());
-        }
+        prepareMsg(msg, hex);
     }
 
     public DataEncryptionStandard(String[] keys, String msg, boolean hex) {
@@ -118,6 +107,10 @@ public class DataEncryptionStandard {
             BigInteger k = new BigInteger(keys[i], 16);
             this.keysBytes[i] = k.toByteArray();
         }
+        prepareMsg(msg, hex);
+    }
+
+    private void prepareMsg(String msg, boolean hex) {
         if (hex) {
             BigInteger bg = new BigInteger(msg, 16);
             byte[] ba = bg.toByteArray();
