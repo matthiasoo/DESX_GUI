@@ -1,5 +1,10 @@
 package org.example.model;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class DataEncryptionStandard {
     private final byte[] pc1 = {
             57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
@@ -89,57 +94,215 @@ public class DataEncryptionStandard {
     private String[] keys;
     private String msg;
 
-    public DataEncryptionStandard(String key, String msg) {
+    private List<byte[]> blocks;
+
+    private byte[] keyBytes;
+    private byte[][] keysBytes;
+    private byte[] msgBytes;
+
+    public DataEncryptionStandard(){}
+
+    public DataEncryptionStandard(String key, String msg,boolean hex) {
         this.key = key;
         this.msg = msg;
+        //znaki klucza sa interpretowane jako cyfry heksadecymalne
+        //to big int
+        this.keyBytes=longToBytes(Long.parseLong(key,16));
+
+        if(hex){
+            //hex str -> ascii str
+            BigInteger bg=new BigInteger(msg,16);
+            byte[] _ba=bg.toByteArray();
+
+            if(_ba.length%8==1 && _ba[0]==0){
+                byte[] ba = Arrays.copyOfRange(_ba, 1, _ba.length);
+                _ba=ba;
+            }
+            createBlocks(_ba);
+        }
+        else{
+            createBlocks(this.msg.getBytes());
+        }
     }
 
-    public DataEncryptionStandard(String[] keys, String msg) {
+    public DataEncryptionStandard(String[] keys, String msg,boolean hex) {
         this.keys = keys;
         this.msg = msg;
+        this.keysBytes=new byte[keys.length][8];
+        for(int i=0; i<keys.length; i++){
+            this.keysBytes[i]=longToBytes(Long.parseLong(keys[i],16));
+        }
+        if(hex){
+            BigInteger bg_str=new BigInteger(msg,16);
+            this.msgBytes = bg_str.toByteArray();
+        }
+        else{
+            this.msgBytes = msg.getBytes();
+        }
     }
 
-    public long des(byte[] keyB, byte[] msgB, boolean decrypt) {
+    //to remove
+    public DataEncryptionStandard(byte[] key,byte[] msg){
+        this.keyBytes=key;
+        this.msgBytes=msg;
+    }
+
+    //to remove
+    public DataEncryptionStandard(byte[][] keys,byte[] msg){
+        this.keysBytes=keys;
+        this.msgBytes=msg;
+    }
+
+    public void createBlocks(byte[] str){
+        //odczytuje kody ascii
+
+        int _len=str.length;
+        int len=_len%8!=0?((_len/8+1)*8):_len;
+        byte[] data=new byte[len];
+
+        System.out.println("Len: "+_len);
+        System.out.println("Len: "+len);
+        System.out.println("BLn: "+data.length);
+
+        System.arraycopy(str,0,data,0,_len);
+
+        this.blocks=new ArrayList<>();
+
+        for(int i=0;i<data.length;i+=8){
+            byte[] block=new byte[8];
+            System.arraycopy(data,i,block,0,8);
+            this.blocks.add(block);
+        }
+
+        for(byte[] block:this.blocks){
+            System.out.println(Arrays.toString(block));
+            for(int i=0;i<block.length;i++){
+                System.out.print(Integer.toHexString((int)(block[i])&0xFF)+" ");
+            }
+            System.out.println();
+        }
+    }
+
+    //to remove
+    public void createBlocks(String str){
+        //odczytuje kody ascii
+
+        int _len=str.getBytes().length;
+        int len=_len%8!=0?((_len/8+1)*8):_len;
+        byte[] data=new byte[len];
+
+        System.out.println("Len: "+_len);
+        System.out.println("Len: "+len);
+        System.out.println("BLn: "+data.length);
+
+        System.arraycopy(str.getBytes(),0,data,0,_len);
+
+        this.blocks=new ArrayList<>();
+
+        for(int i=0;i<data.length;i+=8){
+            byte[] block=new byte[8];
+            System.arraycopy(data,i,block,0,8);
+            this.blocks.add(block);
+        }
+
+        for(byte[] block:this.blocks){
+            System.out.println(Arrays.toString(block));
+            for(int i=0;i<block.length;i++){
+                System.out.print(Integer.toHexString((int)(block[i])&0xFF)+" ");
+            }
+            System.out.println();
+        }
+    }
+
+    public String desEncryption() {
+        StringBuilder out= new StringBuilder();
+        System.out.println("Blocks: "+this.blocks.size());
+        for(byte[] block:this.blocks){
+            System.out.println("Blocks length: "+block.length);
+            long a = des(keyBytes, block, false);
+            //System.out.println("DES Encrypt: " + Long.toHexString(a));
+            //out.append(Long.toHexString(a));
+            out.append(String.format("%016x", a));
+            //System.out.println("Str: "+new String(longToBytes(a)));
+        }
+        System.out.println("DES Encrypt: "+out.toString());
+        return out.toString();
+    }
+
+    public String desXEncryption() {
+        long a = desx(keysBytes, msgBytes, false);
+        System.out.println("DESX Encrypt: " + Long.toHexString(a));
+        System.out.println("Str: "+new String(longToBytes(a)));
+        return Long.toHexString(a);
+    }
+
+    public String desDecryption() {
+        StringBuilder out= new StringBuilder();
+        for(byte[] block:this.blocks){
+            long a = des(keyBytes, block, true);
+            //System.out.println("DES Encrypt: " + Long.toHexString(a));
+            //out.append(Long.toHexString(a));
+            out.append(String.format("%016x", a));
+            System.out.println("Str: "+new String(longToBytes(a)));
+        }
+        System.out.println("DES Encrypt: "+out.toString());
+        return out.toString();
+        /*
+        long a = des(keyBytes, msgBytes, true);
+        System.out.println("DES Decrypt: " + Long.toHexString(a));
+        System.out.println("Str: "+new String(longToBytes(a)));
+        return Long.toHexString(a);
+        */
+    }
+
+    public String desXDecryption() {
+        long a = desx(keysBytes, msgBytes, true);
+        System.out.println("DESX Decrypt: " + Long.toHexString(a));
+        System.out.println("Str: "+new String(longToBytes(a)));
+        return Long.toHexString(a);
+    }
+
+    private long des(byte[] keyB, byte[] msgB, boolean decrypt) {
         long key64 = bytesToLong(keyB);
-        long key56 = select_bits(key64, this.pc1, 64);
+        long key56 = selectBits(key64, this.pc1, 64);
         int key28l = (int) (key56 >> 28);
         int key28r = (int) (key56 & 0xfffffff);
         long[] keys56 = new long[17];
         keys56[0] = key56;
         for (int i = 0; i < 16; i++) {
-            key28l = rotl(key28l, this.shift[i]);
-            key28r = rotl(key28r, this.shift[i]);
+            key28l = rotLeft(key28l, this.shift[i]);
+            key28r = rotLeft(key28r, this.shift[i]);
             keys56[i + 1] = ((long) key28l << 28) | key28r;
         }
         long[] keys48 = new long[17];
         for (int i = 0; i < 17; i++) {
-            keys48[i] = select_bits(keys56[i], this.pc2, 56);
+            keys48[i] = selectBits(keys56[i], this.pc2, 56);
         }
         long msg = bytesToLong(msgB);
-        long msg64 = select_bits(msg, this.ip, 64);
+        long msg64 = selectBits(msg, this.ip, 64);
         int msg32l = (int) (msg64 >> 32);
         int msg32r = (int) (msg64);
 
         for (int i = 0; i < 16; i++) {
             long next = 0;
-            long k = select_bits(msg32r, this.ex, 32) ^ keys48[decrypt ? 16 - i : i + 1];
+            long k = selectBits(msg32r, this.ex, 32) ^ keys48[decrypt ? 16 - i : i + 1];
             for (int j = 0; j < 8; j++) {
                 int bit6 = (int) ((k >> j * 6) & 0b11_1111);
                 int row = (((bit6 & 0b10_0000) >> 4) & 0b10) | (bit6 & 1);
                 int col = (bit6 & 0b01_1110) >> 1;
                 next |= ((long) this.sbox[7 - j][16 * row + col]) << (j * 4);
             }
-            int f = (int) select_bits(next, this.pblock, 32);
+            int f = (int) selectBits(next, this.pblock, 32);
             int lxor = msg32l ^ f;
             msg32l = msg32r;
             msg32r = lxor;
         }
         long msg64rl = ((long) msg32r << 32) | ((long) msg32l & 0xffff_ffffL);
-        long finalMsg = select_bits(msg64rl, this.ip1, 64);
+        long finalMsg = selectBits(msg64rl, this.ip1, 64);
         return finalMsg;
     }
 
-    public long desx(byte[][] keys, byte[] msgB, boolean decrypt) {
+    private long desx(byte[][] keys, byte[] msgB, boolean decrypt) {
         long key1 = bytesToLong(keys[decrypt ? 2 : 0]);
         long key3 = bytesToLong(keys[decrypt ? 0 : 2]);
         long msg = bytesToLong(msgB);
@@ -149,7 +312,7 @@ public class DataEncryptionStandard {
         return finalMsg;
     }
 
-    private long select_bits(long key64, byte[] map, long bits) {
+    private long selectBits(long key64, byte[] map, long bits) {
         long out64 = 0;
         for (int i = 0; i < map.length; i++) {
             out64 |= ((key64 >> (bits - map[i])) & 1) << (map.length - i - 1);
@@ -157,7 +320,7 @@ public class DataEncryptionStandard {
         return out64;
     }
 
-    private int rotl(int keyHalf, int shift) {
+    private int rotLeft(int keyHalf, int shift) {
         int tmp = (keyHalf & ((1 << 31) >> (3 + shift))) >> (28 - shift);
         keyHalf <<= shift;
         keyHalf |= tmp;
@@ -181,4 +344,5 @@ public class DataEncryptionStandard {
         }
         return b;
     }
+
 }

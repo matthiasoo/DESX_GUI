@@ -1,5 +1,8 @@
 package org.example.model;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 public class Main {
     public static void main(String[] args) {
         byte[] keyB = new byte[]{
@@ -26,7 +29,7 @@ public class Main {
                 (byte) 0x70, (byte) 0x0F, (byte) 0xE5, (byte) 0xCF,
                 (byte) 0x67, (byte) 0x46, (byte) 0xA9, (byte) 0xFB
         };
-        byte[][] keys = {
+        byte[][] keysBytes = {
                 {
                         (byte) 0x00, (byte) 0x22, (byte) 0x44, (byte) 0x66,
                         (byte) 0x88, (byte) 0xAA, (byte) 0xCC, (byte) 0xEE
@@ -39,9 +42,9 @@ public class Main {
                         (byte) 0x01, (byte) 0x23, (byte) 0x45, (byte) 0x67,
                         (byte) 0x89, (byte) 0xAB, (byte) 0xCD, (byte) 0xEF
                 }
-
         };
-        DataEncryptionStandard d = new DataEncryptionStandard("", "");
+        /*
+        DataEncryptionStandard d = new DataEncryptionStandard();
         long a = d.des(keyB, msgB, false);
         System.out.println("Encrypt: " + Long.toHexString(a));
         long x = d.des(keyB, crt1b, true);
@@ -52,10 +55,51 @@ public class Main {
         long z = d.des(keyB, crt2b, true);
         System.out.println("Decrypt: " + Long.toHexString(z));
 
-        long b = d.desx(keys, msg1b, false);
+        long b = d.desx(keysBytes, msg1b, false);
         System.out.println("Encrypt: " + Long.toHexString(b));
-        long y = d.desx(keys, crt3b, true);
+        long y = d.desx(keysBytes, crt3b, true);
         System.out.println("Decrypt: " + Long.toHexString(y));
+        */
+
+        /*
+        System.out.println("========");
+
+        DataEncryptionStandard d0=new DataEncryptionStandard(keyB, msg1b);
+        String d0e=d0.desEncryption();
+
+        BigInteger d0e_str=new BigInteger(d0e,16);
+        byte[] crt_d0=d0e_str.toByteArray();
+
+        DataEncryptionStandard d12=new DataEncryptionStandard(keyB, crt_d0);
+        String d12e=d12.desDecryption();
+
+
+        System.out.println("========");
+        */
+
+
+        DataEncryptionStandard _d1 =new DataEncryptionStandard("0123456789ABCDEF","Alamakotaą",false);
+        String _d1e = _d1.desEncryption();
+        System.out.println("Len:\t"+_d1e.length());
+        //String _d1e="9b81be597bb5a248";
+
+        DataEncryptionStandard d1e=new DataEncryptionStandard("0123456789ABCDEF", _d1e,true);
+        d1e.desDecryption();
+
+        /*
+        String[] keys={
+                "0022446688AACCEE",
+                "1133557799BBDDFF",
+                "0123456789ABCDEF"
+        };
+        DataEncryptionStandard d2=new DataEncryptionStandard(keys,"Alamakot",false);
+        String d2e=d2.desXEncryption();
+        DataEncryptionStandard d3=new DataEncryptionStandard(keys,d2e,true);
+        d3.desXDecryption();
+        System.out.println("========");
+        */
+
+        //DataEncryptionStandard.createBlocks("aąasdfgA");
 
     }
 }
