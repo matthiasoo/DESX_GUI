@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -110,6 +111,7 @@
                   <Insets bottom="50.0" />
                </VBox.margin>
             </Label>
+            <CheckBox mnemonicParsing="false" onAction="#fileChecker" text="File" />
             <TextArea fx:id="decodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Decoded text" wrapText="true">
                <VBox.margin>
                   <Insets bottom="5.0" />

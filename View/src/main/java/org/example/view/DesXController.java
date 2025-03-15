@@ -9,12 +9,16 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.example.model.DataEncryptionStandard;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -58,13 +62,13 @@ public class DesXController {
 
     @FXML
     void close(ActionEvent event) {
-        Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
     }
 
     @FXML
     void minimize(ActionEvent event) {
-        Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setIconified(true);
     }
 
@@ -76,42 +80,101 @@ public class DesXController {
 
     @FXML
     void dragged(MouseEvent event) {
-        Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setX(event.getScreenX() - xxCord);
         stage.setY(event.getScreenY() - yyCord);
     }
 
     @FXML
     void encode(ActionEvent event) {
+        String[] keys = {
+                keyField1.getText(),
+                keyField2.getText(),
+                keyField3.getText()
+        };
+        DataEncryptionStandard d;
 
+        if (this.fileCheck) {
+            d = new DataEncryptionStandard(keys, this.decodedBytes);
+        } else {
+            String text = decodedTextArea.getText();
+            d = new DataEncryptionStandard(keys, DataEncryptionStandard.stringToBytes(text));
+        }
+
+        this.encodedBytes = d.desXEncryption();
+        encodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.encodedBytes));
     }
+
+    private byte[] encodedBytes;
+    private byte[] decodedBytes;
 
     @FXML
     void decode(ActionEvent event) {
+        String[] keys = {
+                keyField1.getText(),
+                keyField2.getText(),
+                keyField3.getText()
+        };
+        DataEncryptionStandard d;
 
+        if (this.fileCheck) {
+            d = new DataEncryptionStandard(keys, this.encodedBytes);
+        } else {
+            String text = encodedTextArea.getText();
+            d = new DataEncryptionStandard(keys, DataEncryptionStandard.hexStringToBytes(text));
+        }
+
+        this.decodedBytes = d.desXDecryption();
+        decodedTextArea.setText(DataEncryptionStandard.bytesToString(this.decodedBytes));
+    }
+
+    private boolean fileCheck = false;
+
+    @FXML
+    void fileChecker(ActionEvent event) {
+        decodedTextArea.setEditable(fileCheck);
+        encodedTextArea.setEditable(fileCheck);
+
+        this.decodedBytes = new byte[]{};
+        decodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.decodedBytes));
+        this.encodedBytes = new byte[]{};
+        encodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.encodedBytes));
+
+        this.fileCheck = !this.fileCheck;
     }
 
     @FXML
     void generateKeys(ActionEvent event) {
+        /*
         keyField1.setText(generateKey());
         keyField2.setText(generateKey());
         keyField3.setText(generateKey());
+        */
+        keyField1.setText("0022446688AACCEE");
+        keyField2.setText("1133557799BBDDFF");
+        keyField3.setText("0123456789ABCDEF");
     }
 
     @FXML
     void loadFromFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        File file = fileChooser.showOpenDialog(((Node)event.getSource()).getScene().getWindow());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.*"));
+        File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
             try {
-                String content = Files.readString(file.toPath());
-
                 if (event.getSource() == decryptedTextLoader) {
+                    this.decodedBytes = Files.readAllBytes(file.toPath());
+                    String content = new String(this.decodedBytes);
                     decodedTextArea.setText(content);
                 } else if (event.getSource() == encryptedTextLoader) {
+                    this.encodedBytes = Files.readAllBytes(file.toPath());
+                    StringBuilder hexString = new StringBuilder();
+                    for (byte b : this.encodedBytes) {
+                        hexString.append(String.format("%02X", b));
+                    }
+                    String content = hexString.toString();
                     encodedTextArea.setText(content);
                 }
             } catch (IOException e) {
@@ -124,15 +187,16 @@ public class DesXController {
     void saveToFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save to File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
-        File file = fileChooser.showSaveDialog(((Node)event.getSource()).getScene().getWindow());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.*"));
+        File file = fileChooser.showSaveDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
             try {
                 if (event.getSource() == decryptedTextSaver) {
-                    Files.writeString(file.toPath(), decodedTextArea.getText(), StandardOpenOption.CREATE);
+                    Files.write(file.toPath(), this.decodedBytes);
+
                 } else if (event.getSource() == encryptedTextSaver) {
-                    Files.writeString(file.toPath(), encodedTextArea.getText(), StandardOpenOption.CREATE);
+                    Files.write(file.toPath(), this.encodedBytes);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -145,7 +209,7 @@ public class DesXController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Hex Keys", "*.hexkey"));
-        File file = fileChooser.showOpenDialog(((Node)event.getSource()).getScene().getWindow());
+        File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
             try {
@@ -165,7 +229,7 @@ public class DesXController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save to File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Hex Keys", "*.hexkey"));
-        File file = fileChooser.showSaveDialog(((Node)event.getSource()).getScene().getWindow());
+        File file = fileChooser.showSaveDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
             try {

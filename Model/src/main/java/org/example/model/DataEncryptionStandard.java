@@ -92,36 +92,50 @@ public class DataEncryptionStandard {
 
     private List<byte[]> blocks;
 
-    private byte[] keyBytes;
     private byte[][] keysBytes;
 
-    public DataEncryptionStandard(String key, String msg, boolean hex) {
-        BigInteger k = new BigInteger(key, 16);
-        this.keyBytes = k.toByteArray();
-        prepareMsg(msg, hex);
-    }
-
-    public DataEncryptionStandard(String[] keys, String msg, boolean hex) {
+    public DataEncryptionStandard(String[] keys, byte[] msg) {
         this.keysBytes = new byte[keys.length][8];
         for (int i = 0; i < keys.length; i++) {
             BigInteger k = new BigInteger(keys[i], 16);
             this.keysBytes[i] = k.toByteArray();
         }
-        prepareMsg(msg, hex);
+        createBlocks(msg);
     }
 
-    private void prepareMsg(String msg, boolean hex) {
-        if (hex) {
-            BigInteger bg = new BigInteger(msg, 16);
-            byte[] ba = bg.toByteArray();
+    public static byte[] hexStringToBytes(String str) {
+        BigInteger bg = new BigInteger(str, 16);
+        byte[] ba = bg.toByteArray();
 
-            if (ba.length % 8 == 1 && ba[0] == 0) {
-                ba = Arrays.copyOfRange(ba, 1, ba.length);
-            }
-            createBlocks(ba);
-        } else {
-            createBlocks(msg.getBytes());
+        if (ba.length % 8 == 1 && ba[0] == 0) {
+            ba = Arrays.copyOfRange(ba, 1, ba.length);
         }
+
+        return ba;
+    }
+
+    public static byte[] stringToBytes(String str) {
+        return str.getBytes();
+    }
+
+    public static String bytesToString(byte[] src) {
+        return new String(src);
+    }
+
+    public static String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+        for (int i = 0; i < src.length; i++) {
+            int v = src[i] & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                stringBuilder.append(0);
+            }
+            stringBuilder.append(hv);
+        }
+        return stringBuilder.toString();
     }
 
     private void createBlocks(byte[] str) {
@@ -140,48 +154,44 @@ public class DataEncryptionStandard {
         }
     }
 
-    public String desEncryption() {
-        StringBuilder out = new StringBuilder();
-        for (byte[] block : this.blocks) {
-            long a = des(this.keyBytes, block, false);
-            out.append(String.format("%016x", a));
-            System.out.println("Str: " + new String(longToBytes(a)));
-        }
-        System.out.println("DES Encrypt: " + out);
-        return out.toString();
-    }
-
-    public String desXEncryption() {
-        StringBuilder out = new StringBuilder();
+    public byte[] desXEncryption() {
+        List<Byte> q = new ArrayList<>();
         for (byte[] block : this.blocks) {
             long a = desx(this.keysBytes, block, false);
-            out.append(String.format("%016x", a));
-            System.out.println("Str: " + new String(longToBytes(a)));
+            byte[] tmpBytes = longToBytes(a);
+            for (int i = 0; i < tmpBytes.length; i++) {
+                q.add(tmpBytes[i]);
+            }
         }
-        System.out.println("DESX Encrypt: " + out);
-        return out.toString();
+
+        byte[] out = new byte[q.size()];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = q.get(i);
+        }
+
+        return out;
     }
 
-    public String desDecryption() {
-        StringBuilder out = new StringBuilder();
-        for (byte[] block : this.blocks) {
-            long a = des(this.keyBytes, block, true);
-            out.append(String.format("%016x", a));
-            System.out.println("Str: " + new String(longToBytes(a)));
-        }
-        System.out.println("DES Decrypt: " + out);
-        return out.toString();
-    }
-
-    public String desXDecryption() {
-        StringBuilder out = new StringBuilder();
+    public byte[] desXDecryption() {
+        List<Byte> q = new ArrayList<>();
         for (byte[] block : this.blocks) {
             long a = desx(this.keysBytes, block, true);
-            out.append(String.format("%016x", a));
-            System.out.println("Str: " + new String(longToBytes(a)));
+            byte[] tmpBytes = longToBytes(a);
+            for (int i = 0; i < tmpBytes.length; i++) {
+                q.add(tmpBytes[i]);
+            }
         }
-        System.out.println("DESX Decrypt: " + out);
-        return out.toString();
+
+        while (q.getLast() == 0x00) {
+            q.removeLast();
+        }
+
+        byte[] out = new byte[q.size()];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = q.get(i);
+        }
+
+        return out;
     }
 
     private long des(byte[] keyB, byte[] msgB, boolean decrypt) {
