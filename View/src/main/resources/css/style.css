@@ -1,5 +1,5 @@
 .anchor {
-    -fx-background-color: #1B2C3F;
+    -fx-background-color: #1b2c3f;
     -fx-background-radius: 12px;
 }
 
@@ -85,4 +85,18 @@
 
 .text-area .scroll-bar {
     -fx-opacity: 0;
+}
+
+.check-box {
+    -fx-text-fill: #ffc400;
+}
+
+.check-box .box {
+    -fx-background-color: #182636;
+    -fx-border-color: #ffc400;
+    -fx-border-radius: 6px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #ffc400;
 }

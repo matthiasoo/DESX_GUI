@@ -88,7 +88,12 @@ public class DesXController {
     }
 
     @FXML
-    void encode(ActionEvent event) {
+    void showAuthors(ActionEvent event) throws IOException {
+        MessageWindow.authorsWindow();
+    }
+
+    @FXML
+    void encode(ActionEvent event) throws IOException {
         String[] keys = {
                 keyField1.getText(),
                 keyField2.getText(),
@@ -105,6 +110,7 @@ public class DesXController {
                 d = new DataEncryptionStandard(keys, this.decodedBytes);
             } catch (DesException e) {
                 System.out.println(e.getMessage());
+                MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         } else {
@@ -121,6 +127,7 @@ public class DesXController {
                 d = new DataEncryptionStandard(keys, DataEncryptionStandard.stringToBytes(text));
             } catch (DesException e) {
                 System.out.println(e.getMessage());
+                MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         }
@@ -129,7 +136,7 @@ public class DesXController {
     }
 
     @FXML
-    void decode(ActionEvent event) {
+    void decode(ActionEvent event) throws IOException {
         String[] keys = {
                 keyField1.getText(),
                 keyField2.getText(),
@@ -146,6 +153,7 @@ public class DesXController {
                 d = new DataEncryptionStandard(keys, this.encodedBytes);
             } catch (DesException e) {
                 System.out.println(e.getMessage());
+                MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         } else {
@@ -162,6 +170,7 @@ public class DesXController {
                 d = new DataEncryptionStandard(keys, DataEncryptionStandard.hexStringToBytes(text));
             } catch (DesException e) {
                 System.out.println(e.getMessage());
+                MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         }
@@ -196,9 +205,9 @@ public class DesXController {
     }
 
     @FXML
-    void loadFromFile(ActionEvent event) {
+    void loadFromFile(ActionEvent event) throws IOException {
         if (!fileCheck) {
-            System.out.println("Nie zaznaczono opcki (tekst do zmiany)");
+            System.out.println("Nie zaznaczono opcji (tekst do zmiany)");
             return;
         }
 
@@ -226,12 +235,13 @@ public class DesXController {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
     }
 
     @FXML
-    void saveToFile(ActionEvent event) {
+    void saveToFile(ActionEvent event) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save to File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
@@ -249,12 +259,13 @@ public class DesXController {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
     }
 
     @FXML
-    void loadKeyFromFile(ActionEvent event) {
+    void loadKeyFromFile(ActionEvent event) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Hex Keys", "*.hexkey"));
@@ -280,12 +291,13 @@ public class DesXController {
                 keyField3.setText(keys.get(2));
             } catch (IOException e) {
                 e.printStackTrace();
+                MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
     }
 
     @FXML
-    void saveKeyToFile(ActionEvent event) {
+    void saveKeyToFile(ActionEvent event) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save to File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Hex Keys", "*.hexkey"));
@@ -302,6 +314,7 @@ public class DesXController {
                 Files.write(file.toPath(), keys, StandardOpenOption.CREATE);
             } catch (IOException e) {
                 e.printStackTrace();
+                MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
     }

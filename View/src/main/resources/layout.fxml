@@ -58,7 +58,7 @@
          <children>
             <Label styleClass="header_label" text="Keys">
                <VBox.margin>
-                  <Insets bottom="100.0" />
+                  <Insets bottom="60.0" />
                </VBox.margin>
             </Label>
             <Label text="Key 1" />
@@ -91,9 +91,10 @@
             </Button>
             <Button fx:id="keySaver" mnemonicParsing="false" onAction="#saveKeyToFile" styleClass="button-inside" text="Save keys to file">
                <VBox.margin>
-                  <Insets bottom="70.0" />
+                  <Insets bottom="120.0" />
                </VBox.margin>
             </Button>
+            <Button mnemonicParsing="false" onAction="#showAuthors" styleClass="button-inside" text="Authors" />
          </children>
          <BorderPane.margin>
             <Insets />
@@ -111,7 +112,10 @@
                   <Insets bottom="50.0" />
                </VBox.margin>
             </Label>
-            <CheckBox mnemonicParsing="false" onAction="#fileChecker" text="File" />
+            <CheckBox mnemonicParsing="false" onAction="#fileChecker" text="File">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin></CheckBox>
             <TextArea fx:id="decodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Decoded text" wrapText="true">
                <VBox.margin>
                   <Insets bottom="5.0" />
