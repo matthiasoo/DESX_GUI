@@ -10,15 +10,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.model.DataEncryptionStandard;
+import org.example.model.DesException;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -60,6 +58,10 @@ public class DesXController {
     private double xxCord = 0;
     private double yyCord = 0;
 
+    private byte[] encodedBytes = new byte[]{};
+    private byte[] decodedBytes = new byte[]{};
+    private boolean fileCheck = false;
+
     @FXML
     void close(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -95,18 +97,36 @@ public class DesXController {
         DataEncryptionStandard d;
 
         if (this.fileCheck) {
-            d = new DataEncryptionStandard(keys, this.decodedBytes);
+            if (this.decodedBytes.length == 0) {
+                System.out.println("Empty buffer");
+                return;
+            }
+            try {
+                d = new DataEncryptionStandard(keys, this.decodedBytes);
+            } catch (DesException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         } else {
             String text = decodedTextArea.getText();
-            d = new DataEncryptionStandard(keys, DataEncryptionStandard.stringToBytes(text));
+            if (text == null) {
+                System.out.println("#############");
+                return;
+            }
+            if (text.isEmpty()) {
+                System.out.println("Text is empty");
+                return;
+            }
+            try {
+                d = new DataEncryptionStandard(keys, DataEncryptionStandard.stringToBytes(text));
+            } catch (DesException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         }
-
         this.encodedBytes = d.desXEncryption();
         encodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.encodedBytes));
     }
-
-    private byte[] encodedBytes;
-    private byte[] decodedBytes;
 
     @FXML
     void decode(ActionEvent event) {
@@ -118,17 +138,37 @@ public class DesXController {
         DataEncryptionStandard d;
 
         if (this.fileCheck) {
-            d = new DataEncryptionStandard(keys, this.encodedBytes);
+            if (this.encodedBytes.length == 0) {
+                System.out.println("Empty buffer");
+                return;
+            }
+            try {
+                d = new DataEncryptionStandard(keys, this.encodedBytes);
+            } catch (DesException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         } else {
             String text = encodedTextArea.getText();
-            d = new DataEncryptionStandard(keys, DataEncryptionStandard.hexStringToBytes(text));
+            if (text == null) {
+                System.out.println("#############___");
+                return;
+            }
+            if (text.isEmpty()) {
+                System.out.println("Text is empty");
+                return;
+            }
+            try {
+                d = new DataEncryptionStandard(keys, DataEncryptionStandard.hexStringToBytes(text));
+            } catch (DesException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         }
 
         this.decodedBytes = d.desXDecryption();
         decodedTextArea.setText(DataEncryptionStandard.bytesToString(this.decodedBytes));
     }
-
-    private boolean fileCheck = false;
 
     @FXML
     void fileChecker(ActionEvent event) {
@@ -145,21 +185,28 @@ public class DesXController {
 
     @FXML
     void generateKeys(ActionEvent event) {
-        /*
         keyField1.setText(generateKey());
         keyField2.setText(generateKey());
         keyField3.setText(generateKey());
-        */
+        /*
         keyField1.setText("0022446688AACCEE");
         keyField2.setText("1133557799BBDDFF");
         keyField3.setText("0123456789ABCDEF");
+        */
     }
 
     @FXML
     void loadFromFile(ActionEvent event) {
+        if (!fileCheck) {
+            System.out.println("Nie zaznaczono opcki (tekst do zmiany)");
+            return;
+        }
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.*"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                "Text Files", event.getSource() == decryptedTextLoader ? "*.*" : "*.desx"
+        ));
         File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
@@ -187,7 +234,9 @@ public class DesXController {
     void saveToFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save to File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.*"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                "Text Files", event.getSource() == decryptedTextSaver ? "*.*" : "*.desx"
+        ));
         File file = fileChooser.showSaveDialog(((Node) event.getSource()).getScene().getWindow());
 
         if (file != null) {
@@ -214,6 +263,17 @@ public class DesXController {
         if (file != null) {
             try {
                 List<String> keys = Files.readAllLines(file.toPath());
+
+                if (keys.size() != 3) {
+                    System.out.println("Zła ilosć kluczy w pliku");
+                    return;
+                }
+                for (int i = 0; i < keys.size(); i++) {
+                    if (keys.get(i).length() != 16) {
+                        System.out.println("Zla dlugosc klusza" + (i + 1));
+                        return;
+                    }
+                }
 
                 keyField1.setText(keys.get(0));
                 keyField2.setText(keys.get(1));
