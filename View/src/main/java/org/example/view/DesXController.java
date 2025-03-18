@@ -103,30 +103,28 @@ public class DesXController {
 
         if (this.fileCheck) {
             if (this.decodedBytes.length == 0) {
-                System.out.println("Empty buffer");
+                MessageWindow.errorMessageWindow("Empty buffer");
                 return;
             }
             try {
                 d = new DataEncryptionStandard(keys, this.decodedBytes);
             } catch (DesException e) {
-                System.out.println(e.getMessage());
                 MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         } else {
             String text = decodedTextArea.getText();
             if (text == null) {
-                System.out.println("#############");
+                MessageWindow.errorMessageWindow("Text is empty");
                 return;
             }
             if (text.isEmpty()) {
-                System.out.println("Text is empty");
+                MessageWindow.errorMessageWindow("Text is empty");
                 return;
             }
             try {
                 d = new DataEncryptionStandard(keys, DataEncryptionStandard.stringToBytes(text));
             } catch (DesException e) {
-                System.out.println(e.getMessage());
                 MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
@@ -146,30 +144,28 @@ public class DesXController {
 
         if (this.fileCheck) {
             if (this.encodedBytes.length == 0) {
-                System.out.println("Empty buffer");
+                MessageWindow.errorMessageWindow("Empty buffer");
                 return;
             }
             try {
                 d = new DataEncryptionStandard(keys, this.encodedBytes);
             } catch (DesException e) {
-                System.out.println(e.getMessage());
                 MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
         } else {
             String text = encodedTextArea.getText();
             if (text == null) {
-                System.out.println("#############___");
+                MessageWindow.errorMessageWindow("Text is empty");
                 return;
             }
             if (text.isEmpty()) {
-                System.out.println("Text is empty");
+                MessageWindow.errorMessageWindow("Text is empty");
                 return;
             }
             try {
                 d = new DataEncryptionStandard(keys, DataEncryptionStandard.hexStringToBytes(text));
             } catch (DesException e) {
-                System.out.println(e.getMessage());
                 MessageWindow.errorMessageWindow(e.getMessage());
                 return;
             }
@@ -197,17 +193,12 @@ public class DesXController {
         keyField1.setText(generateKey());
         keyField2.setText(generateKey());
         keyField3.setText(generateKey());
-        /*
-        keyField1.setText("0022446688AACCEE");
-        keyField2.setText("1133557799BBDDFF");
-        keyField3.setText("0123456789ABCDEF");
-        */
     }
 
     @FXML
     void loadFromFile(ActionEvent event) throws IOException {
         if (!fileCheck) {
-            System.out.println("Nie zaznaczono opcji (tekst do zmiany)");
+            MessageWindow.errorMessageWindow("File checkbox not checked");
             return;
         }
 
@@ -234,7 +225,6 @@ public class DesXController {
                     encodedTextArea.setText(content);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
@@ -258,7 +248,6 @@ public class DesXController {
                     Files.write(file.toPath(), this.encodedBytes);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
@@ -276,12 +265,12 @@ public class DesXController {
                 List<String> keys = Files.readAllLines(file.toPath());
 
                 if (keys.size() != 3) {
-                    System.out.println("Zła ilosć kluczy w pliku");
+                    MessageWindow.errorMessageWindow("Incorrect number of keys in file");
                     return;
                 }
                 for (int i = 0; i < keys.size(); i++) {
                     if (keys.get(i).length() != 16) {
-                        System.out.println("Zla dlugosc klusza" + (i + 1));
+                        MessageWindow.errorMessageWindow("Length of key " + (i + 1) + " is incorrect");
                         return;
                     }
                 }
@@ -290,7 +279,6 @@ public class DesXController {
                 keyField2.setText(keys.get(1));
                 keyField3.setText(keys.get(2));
             } catch (IOException e) {
-                e.printStackTrace();
                 MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
@@ -313,7 +301,6 @@ public class DesXController {
 
                 Files.write(file.toPath(), keys, StandardOpenOption.CREATE);
             } catch (IOException e) {
-                e.printStackTrace();
                 MessageWindow.errorMessageWindow(e.getMessage());
             }
         }
