@@ -61,6 +61,7 @@ public class DesXController {
     private byte[] encodedBytes = new byte[]{};
     private byte[] decodedBytes = new byte[]{};
     private boolean fileCheck = false;
+    final int maxTextAreaLength = 1024;
 
     @FXML
     void close(ActionEvent event) {
@@ -130,7 +131,7 @@ public class DesXController {
             }
         }
         this.encodedBytes = d.desXEncryption();
-        encodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.encodedBytes));
+        setTextArea(encodedTextArea, DataEncryptionStandard.bytesToHexString(this.encodedBytes));
     }
 
     @FXML
@@ -172,7 +173,7 @@ public class DesXController {
         }
 
         this.decodedBytes = d.desXDecryption();
-        decodedTextArea.setText(DataEncryptionStandard.bytesToString(this.decodedBytes));
+        setTextArea(decodedTextArea, DataEncryptionStandard.bytesToString(this.decodedBytes));
     }
 
     @FXML
@@ -181,9 +182,9 @@ public class DesXController {
         encodedTextArea.setEditable(fileCheck);
 
         this.decodedBytes = new byte[]{};
-        decodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.decodedBytes));
+        setTextArea(decodedTextArea, DataEncryptionStandard.bytesToHexString(this.decodedBytes));
         this.encodedBytes = new byte[]{};
-        encodedTextArea.setText(DataEncryptionStandard.bytesToHexString(this.encodedBytes));
+        setTextArea(encodedTextArea, DataEncryptionStandard.bytesToHexString(this.encodedBytes));
 
         this.fileCheck = !this.fileCheck;
     }
@@ -214,15 +215,22 @@ public class DesXController {
                 if (event.getSource() == decryptedTextLoader) {
                     this.decodedBytes = Files.readAllBytes(file.toPath());
                     String content = new String(this.decodedBytes);
-                    decodedTextArea.setText(content);
+                    setTextArea(decodedTextArea, content);
                 } else if (event.getSource() == encryptedTextLoader) {
+                    if (Files.size(file.toPath()) % 8 != 0) {
+                        MessageWindow.errorMessageWindow("Wrong encrypted file size");
+                        return;
+                    }
                     this.encodedBytes = Files.readAllBytes(file.toPath());
                     StringBuilder hexString = new StringBuilder();
                     for (byte b : this.encodedBytes) {
                         hexString.append(String.format("%02X", b));
+                        if (hexString.length() > this.maxTextAreaLength / 2) {
+                            break;
+                        }
                     }
                     String content = hexString.toString();
-                    encodedTextArea.setText(content);
+                    setTextArea(encodedTextArea, content);
                 }
             } catch (IOException e) {
                 MessageWindow.errorMessageWindow(e.getMessage());
@@ -315,5 +323,15 @@ public class DesXController {
         }
 
         return key.toString();
+    }
+
+    private void setTextArea(TextArea ta, String str) {
+        if (str == null) {
+            return;
+        }
+        if (str.length() > this.maxTextAreaLength) {
+            str = str.substring(0, this.maxTextAreaLength);
+        }
+        ta.setText(str);
     }
 }

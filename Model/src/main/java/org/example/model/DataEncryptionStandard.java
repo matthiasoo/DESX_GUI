@@ -80,7 +80,7 @@ public class DataEncryptionStandard {
                     7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8,
                     2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}
     };
-    //P-boks
+    //P-boks - tablica permutacji
     private final byte[] pbox = {
             16, 7, 20, 21, 29, 12, 28, 17,
             1, 15, 23, 26, 5, 18, 31, 10,
@@ -309,6 +309,7 @@ public class DataEncryptionStandard {
 
     //zamiana Stringa zawierającego cyfry heksadecymalne na tablicę bajtów
     public static byte[] hexStringToBytes(String str) {
+        str = str.replaceAll("[^0-9A-Fa-f]", "");
         BigInteger bg = new BigInteger(str, 16);
         byte[] ba = bg.toByteArray();
 
@@ -333,7 +334,7 @@ public class DataEncryptionStandard {
     public static String bytesToHexString(byte[] src) {
         StringBuilder stringBuilder = new StringBuilder();
         if (src == null || src.length <= 0) {
-            return null;
+            return "";
         }
         for (int i = 0; i < src.length; i++) {
             int v = src[i] & 0xFF;
