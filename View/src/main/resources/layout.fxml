@@ -107,7 +107,7 @@
    <right>
       <VBox alignment="CENTER" prefHeight="570.0" prefWidth="500.0" BorderPane.alignment="CENTER">
          <children>
-            <Label styleClass="header_label" text="Encoding / Decoding">
+            <Label styleClass="header_label" text="Encryption / Decryption">
                <VBox.margin>
                   <Insets bottom="50.0" />
                </VBox.margin>
@@ -116,12 +116,12 @@
                <VBox.margin>
                   <Insets bottom="10.0" />
                </VBox.margin></CheckBox>
-            <TextArea fx:id="decodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Decoded text" wrapText="true">
+            <TextArea fx:id="decodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Decrypted text" wrapText="true">
                <VBox.margin>
                   <Insets bottom="5.0" />
                </VBox.margin>
             </TextArea>
-            <Button mnemonicParsing="false" onAction="#encode" styleClass="button-inside" text="Encode">
+            <Button mnemonicParsing="false" onAction="#encode" styleClass="button-inside" text="Encrypt">
                <VBox.margin>
                   <Insets bottom="15.0" />
                </VBox.margin>
@@ -136,12 +136,12 @@
                   <Insets bottom="30.0" />
                </VBox.margin>
             </Button>
-            <TextArea fx:id="encodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Encoded text" wrapText="true">
+            <TextArea fx:id="encodedTextArea" prefHeight="120.0" prefWidth="460.0" promptText="Encrypted text" wrapText="true">
                <VBox.margin>
                   <Insets bottom="5.0" />
                </VBox.margin>
             </TextArea>
-            <Button mnemonicParsing="false" onAction="#decode" styleClass="button-inside" text="Decode">
+            <Button mnemonicParsing="false" onAction="#decode" styleClass="button-inside" text="Decrypt">
                <VBox.margin>
                   <Insets bottom="15.0" />
                </VBox.margin>
